@@ -16,9 +16,6 @@ pub enum Action {
 pub struct TargetMermaid {
     #[structopt()]
     pub input: PathBuf,
-
-    #[structopt()]
-    pub output: PathBuf,
 }
 
 #[derive(Debug, StructOpt)]
@@ -31,5 +28,5 @@ pub struct CommandLineArgs {
     pub action: Action,
 
     #[structopt(parse(from_os_str), short, long)]
-    pub input_file: Option<PathBuf>,
+    pub output: Option<PathBuf>,
 }
