@@ -14,11 +14,11 @@ impl Query {
         &mut self.table_name
     }
 
-    pub fn set_format_mut(&mut self) -> &mut String {
+    pub fn format_mut(&mut self) -> &mut String {
         &mut self.format
     }
 
-    pub fn set_field_mut(&mut self) -> &mut Vec<Field> {
+    pub fn field_mut(&mut self) -> &mut Vec<Field> {
         &mut self.field
     }
 }
@@ -53,7 +53,7 @@ impl Field {
         &mut self.is_not_null
     }
 
-    pub fn is_primary(&mut self) -> &mut Option<KeyType> {
+    pub fn key_type(&mut self) -> &mut Option<KeyType> {
         &mut self.key_type
     }
 }
