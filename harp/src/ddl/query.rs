@@ -1,4 +1,4 @@
-use super::field_types::FieldType;
+use super::{field_types::FieldType, key_types::KeyType};
 
 #[derive(Clone, PartialEq, Eq, Debug, Default)]
 pub struct Query {
@@ -33,7 +33,7 @@ pub struct Field {
 
     is_not_null: bool,
 
-    key_type: String,
+    key_type: Option<KeyType>,
 }
 
 impl Field {
@@ -53,7 +53,7 @@ impl Field {
         &mut self.is_not_null
     }
 
-    pub fn is_primary(&mut self) -> &mut bool {
-        &mut self.is_primary
+    pub fn is_primary(&mut self) -> &mut Option<KeyType> {
+        &mut self.key_type
     }
 }
