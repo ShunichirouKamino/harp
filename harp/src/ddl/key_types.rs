@@ -6,10 +6,13 @@ pub enum KeyType {
     PK,
     #[strum(serialize = "FK")]
     FK,
+
+    // No match
+    Nothing,
 }
 
 impl Default for KeyType {
     fn default() -> Self {
-        KeyType::PK
+        KeyType::Nothing
     }
 }

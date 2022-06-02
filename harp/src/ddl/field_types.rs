@@ -13,6 +13,8 @@ pub enum FieldType {
     SmallInt,
     #[strum(serialize = "mediumint")]
     MediumInt,
+    #[strum(serialize = "integer")]
+    Integer,
     #[strum(serialize = "int")]
     Int,
     #[strum(serialize = "bigint")]
@@ -49,10 +51,13 @@ pub enum FieldType {
     TimeStamp,
     #[strum(serialize = "year")]
     Year,
+
+    // No match
+    Nothing,
 }
 
 impl Default for FieldType {
     fn default() -> Self {
-        FieldType::Varchar(128)
+        FieldType::Nothing
     }
 }
