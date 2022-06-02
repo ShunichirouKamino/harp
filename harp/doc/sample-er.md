@@ -7,7 +7,8 @@ users {
   integer id PK
   varchar_32 name "not_null"
   varchar_32 email "not_null"
-  integer age
+  integer age "default_null"
+  datetime create_at "default_current_timestamp"
 }
 
 articles {

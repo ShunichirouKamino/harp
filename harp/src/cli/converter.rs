@@ -5,6 +5,7 @@ use std::{fs::File, fs::OpenOptions, io::BufReader, path::PathBuf};
 use crate::ddl::field_types::FieldType;
 use crate::ddl::key_types::KeyType;
 use crate::ddl::query::{Field, Query};
+use crate::ddl::remark_types::RemarkType;
 
 const CODE_BLOCK: &str = "```mermaid";
 // const ER_START: &str = "erDiagram";
@@ -14,11 +15,7 @@ const ENTITY_END: &str = "}";
 /// # convert your er-diagram to ddl
 ///
 pub fn converte_to_ddl(input_path: PathBuf, output_path: PathBuf) -> std::io::Result<()> {
-    let input_file = OpenOptions::new()
-        .read(true)
-        .write(true)
-        .create(true)
-        .open(&input_path)?;
+    let input_file = OpenOptions::new().read(true).open(&input_path)?;
 
     let reader = BufReader::new(input_file);
 
@@ -60,13 +57,13 @@ pub fn converte_to_ddl(input_path: PathBuf, output_path: PathBuf) -> std::io::Re
                         if let Ok(key_type) = KeyType::from_str(next) {
                             *field.key_type() = Some(key_type);
                         }
-                        if next == r#""not_null""# {
-                            *field.is_not_null() = true;
+                        if let Ok(remark_type) = RemarkType::from_str(next) {
+                            remark_convert(&mut field, &remark_type)
                         }
                     }
                     if let Some(next) = field_line.next() {
-                        if next == r#""not_null""# {
-                            *field.is_not_null() = true;
+                        if let Ok(remark_type) = RemarkType::from_str(next) {
+                            remark_convert(&mut field, &remark_type)
                         }
                     }
 
@@ -86,7 +83,23 @@ pub fn converte_to_ddl(input_path: PathBuf, output_path: PathBuf) -> std::io::Re
             }
         }
     }
+
+    for query in query_vec {
+        println!("{:?}", query);
+    }
+
     File::create(output_path).unwrap();
 
     Ok(())
+}
+
+fn remark_convert(field: &mut Field, remark_type: &RemarkType) {
+    match remark_type {
+        RemarkType::NotNull => *field.is_not_null() = true,
+        RemarkType::DafaultNull => *field.default_value() = Some(RemarkType::DafaultNull),
+        RemarkType::DefaultCurrentTimestamp => {
+            *field.default_value() = Some(RemarkType::DefaultCurrentTimestamp)
+        }
+        RemarkType::Nothing => todo!(),
+    }
 }

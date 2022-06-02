@@ -1,4 +1,4 @@
-use super::{field_types::FieldType, key_types::KeyType};
+use super::{field_types::FieldType, key_types::KeyType, remark_types::RemarkType};
 
 #[derive(Clone, PartialEq, Eq, Debug, Default)]
 pub struct Query {
@@ -33,6 +33,8 @@ pub struct Field {
 
     is_not_null: bool,
 
+    default_value: Option<RemarkType>,
+
     key_type: Option<KeyType>,
 }
 
@@ -51,6 +53,10 @@ impl Field {
 
     pub fn is_not_null(&mut self) -> &mut bool {
         &mut self.is_not_null
+    }
+
+    pub fn default_value(&mut self) -> &mut Option<RemarkType> {
+        &mut self.default_value
     }
 
     pub fn key_type(&mut self) -> &mut Option<KeyType> {
