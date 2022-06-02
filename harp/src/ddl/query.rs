@@ -33,7 +33,7 @@ pub struct Field {
 
     is_not_null: bool,
 
-    is_primary: bool,
+    key_type: String,
 }
 
 impl Field {
