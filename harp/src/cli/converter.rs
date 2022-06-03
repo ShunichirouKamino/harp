@@ -3,6 +3,7 @@ use std::str::FromStr;
 use std::{fs::File, fs::OpenOptions, io::BufReader, path::PathBuf};
 
 use crate::ddl::domain::field_name::FieldName;
+use crate::ddl::domain::field_size::FieldSize;
 use crate::ddl::field_types::FieldType;
 use crate::ddl::key_types::KeyType;
 use crate::ddl::query::{Field, Query};
@@ -74,7 +75,9 @@ pub fn converte_to_ddl(input_path: PathBuf, output_path: PathBuf) -> std::io::Re
                         }
                     }
                     if let Some(field_type_size) = field_types.next() {
-                        *field.field_size() = Some(field_type_size.parse::<u16>().unwrap());
+                        *field.field_size() = Some(
+                            FieldSize::try_from(field_type_size.parse::<u16>().unwrap()).unwrap(),
+                        );
                     }
                     field_vec.push(field);
                 }
@@ -85,10 +88,15 @@ pub fn converte_to_ddl(input_path: PathBuf, output_path: PathBuf) -> std::io::Re
     for mut query in query_vec {
         let query_out = CREATE_START;
         for f in query.field_mut() {
-            let mut field_out = "  ".to_string();
-            //field_out = field_out + f.field_name();
+            let mut field_out = "  ";
+            field_out = field_out + &f.field_name().to_string();
+            field_out = field_out + " ";
+            field_out = field_out + &f.field_type().as_ref();
+            if let Some(size) = f.field_size() {
+                field_out + &size.to_string();
+            }
 
-            println!("{:?}", f)
+            println!("{:?}", field_out)
         }
     }
 
