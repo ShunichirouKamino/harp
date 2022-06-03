@@ -6,6 +6,7 @@ use crate::ddl::field_types::FieldType;
 use crate::ddl::key_types::KeyType;
 use crate::ddl::query::{Field, Query};
 use crate::ddl::remark_types::RemarkType;
+use crate::ddl::template::create_query::CREATE_START;
 
 const CODE_BLOCK: &str = "```mermaid";
 // const ER_START: &str = "erDiagram";
@@ -57,14 +58,10 @@ pub fn converte_to_ddl(input_path: PathBuf, output_path: PathBuf) -> std::io::Re
                         if let Ok(key_type) = KeyType::from_str(next) {
                             *field.key_type() = Some(key_type);
                         }
-                        if let Ok(remark_type) = RemarkType::from_str(next) {
-                            remark_convert(&mut field, &remark_type)
-                        }
+                        remark_convert(&mut field, next);
                     }
                     if let Some(next) = field_line.next() {
-                        if let Ok(remark_type) = RemarkType::from_str(next) {
-                            remark_convert(&mut field, &remark_type)
-                        }
+                        remark_convert(&mut field, next)
                     }
 
                     // if "String", it shoud be something like "varchar_32"
@@ -84,8 +81,14 @@ pub fn converte_to_ddl(input_path: PathBuf, output_path: PathBuf) -> std::io::Re
         }
     }
 
-    for query in query_vec {
-        println!("{:?}", query);
+    for mut query in query_vec {
+        let query_out = CREATE_START;
+        for f in query.field_mut() {
+            let mut field_out: &str = "  ";
+            //field_out = field_out.to_string() + f.field_name();
+
+            println!("{:?}", f)
+        }
     }
 
     File::create(output_path).unwrap();
@@ -93,13 +96,24 @@ pub fn converte_to_ddl(input_path: PathBuf, output_path: PathBuf) -> std::io::Re
     Ok(())
 }
 
-fn remark_convert(field: &mut Field, remark_type: &RemarkType) {
-    match remark_type {
-        RemarkType::NotNull => *field.is_not_null() = true,
-        RemarkType::DafaultNull => *field.default_value() = Some(RemarkType::DafaultNull),
-        RemarkType::DefaultCurrentTimestamp => {
-            *field.default_value() = Some(RemarkType::DefaultCurrentTimestamp)
+fn remark_convert(field: &mut Field, remark_fields: &str) {
+    let remark_fields = remark_fields.replace(r#"""#, "");
+    for r in remark_fields.split_whitespace() {
+        if let Ok(remark_type) = RemarkType::from_str(r) {
+            match remark_type {
+                RemarkType::NotNull => *field.is_not_null() = true,
+                RemarkType::DafaultNull => *field.default_value() = Some(RemarkType::DafaultNull),
+                RemarkType::DefaultCurrentTimestamp => {
+                    *field.default_value() = Some(RemarkType::DefaultCurrentTimestamp)
+                }
+                RemarkType::Nothing => todo!(),
+            }
         }
-        RemarkType::Nothing => todo!(),
     }
 }
+
+// impl<Format> std::fmt::Display for Vec<Format> {
+//     fn fmt(&self, _: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
+//         Ok(())
+//     }
+// }

@@ -2,11 +2,11 @@ use strum::EnumString;
 
 #[derive(Clone, PartialEq, Eq, Debug, EnumString)]
 pub enum RemarkType {
-    #[strum(serialize = r#""not_null""#)]
+    #[strum(serialize = "not_null")]
     NotNull,
-    #[strum(serialize = r#""default_null""#)]
+    #[strum(serialize = "default_null")]
     DafaultNull,
-    #[strum(serialize = r#""default_current_timestamp""#)]
+    #[strum(serialize = "default_current_timestamp")]
     DefaultCurrentTimestamp,
 
     // No match
