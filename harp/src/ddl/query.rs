@@ -1,4 +1,7 @@
-use super::{field_types::FieldType, key_types::KeyType, remark_types::RemarkType};
+use super::{
+    domain::field_name::FieldName, field_types::FieldType, key_types::KeyType,
+    remark_types::RemarkType,
+};
 
 #[derive(Clone, PartialEq, Eq, Debug, Default)]
 pub struct Query {
@@ -25,7 +28,7 @@ impl Query {
 
 #[derive(Clone, PartialEq, Eq, Debug, Default)]
 pub struct Field {
-    field_name: String,
+    field_name: FieldName,
 
     field_type: FieldType,
 
@@ -39,7 +42,7 @@ pub struct Field {
 }
 
 impl Field {
-    pub fn field_name(&mut self) -> &mut String {
+    pub fn field_name(&mut self) -> &mut FieldName {
         &mut self.field_name
     }
 

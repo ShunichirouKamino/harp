@@ -2,6 +2,7 @@ use std::io::BufRead;
 use std::str::FromStr;
 use std::{fs::File, fs::OpenOptions, io::BufReader, path::PathBuf};
 
+use crate::ddl::domain::field_name::FieldName;
 use crate::ddl::field_types::FieldType;
 use crate::ddl::key_types::KeyType;
 use crate::ddl::query::{Field, Query};
@@ -52,7 +53,7 @@ pub fn converte_to_ddl(input_path: PathBuf, output_path: PathBuf) -> std::io::Re
                     // type field
                     let field_type = field_line.next().unwrap();
                     // name field
-                    *field.field_name() = field_line.next().unwrap().to_owned();
+                    *field.field_name() = FieldName::of(field_line.next().unwrap()).unwrap();
                     // key or remark field
                     if let Some(next) = field_line.next() {
                         if let Ok(key_type) = KeyType::from_str(next) {
@@ -84,8 +85,8 @@ pub fn converte_to_ddl(input_path: PathBuf, output_path: PathBuf) -> std::io::Re
     for mut query in query_vec {
         let query_out = CREATE_START;
         for f in query.field_mut() {
-            let mut field_out: &str = "  ";
-            //field_out = field_out.to_string() + f.field_name();
+            let mut field_out = "  ".to_string();
+            //field_out = field_out + f.field_name();
 
             println!("{:?}", f)
         }
