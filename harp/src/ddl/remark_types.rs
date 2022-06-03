@@ -1,6 +1,8 @@
-use strum::EnumString;
+use std::fmt::Display;
 
-#[derive(Clone, PartialEq, Eq, Debug, EnumString)]
+use strum::{AsRefStr, EnumString};
+
+#[derive(Clone, PartialEq, Eq, Debug, EnumString, AsRefStr)]
 pub enum RemarkType {
     #[strum(serialize = "not_null")]
     NotNull,
@@ -16,5 +18,16 @@ pub enum RemarkType {
 impl Default for RemarkType {
     fn default() -> Self {
         RemarkType::Nothing
+    }
+}
+
+impl Display for RemarkType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match *self {
+            RemarkType::NotNull => write!(f, "NOT NULL"),
+            RemarkType::DafaultNull => write!(f, "DEFAULT NULL"),
+            RemarkType::DefaultCurrentTimestamp => write!(f, "DEFAULT CURRENT_TIMESTAMP"),
+            RemarkType::Nothing => todo!(),
+        }
     }
 }

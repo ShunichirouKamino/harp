@@ -1,5 +1,7 @@
 use super::{
-    domain::field_name::FieldName, field_types::FieldType, key_types::KeyType,
+    domain::{field_name::FieldName, field_size::FieldSize},
+    field_types::FieldType,
+    key_types::KeyType,
     remark_types::RemarkType,
 };
 
@@ -32,7 +34,7 @@ pub struct Field {
 
     field_type: FieldType,
 
-    field_size: Option<u16>, // 0 ~ 65535
+    field_size: Option<FieldSize>, // 0 ~ 65535
 
     is_not_null: bool,
 
@@ -50,7 +52,7 @@ impl Field {
         &mut self.field_type
     }
 
-    pub fn field_size(&mut self) -> &mut Option<u16> {
+    pub fn field_size(&mut self) -> &mut Option<FieldSize> {
         &mut self.field_size
     }
 
