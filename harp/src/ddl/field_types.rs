@@ -1,6 +1,6 @@
-use strum::EnumString;
+use strum::{AsRefStr, EnumString};
 
-#[derive(Clone, PartialEq, Eq, Debug, EnumString)]
+#[derive(Clone, PartialEq, Eq, Debug, EnumString, AsRefStr)]
 pub enum FieldType {
     // Number types
     #[strum(serialize = "bit")]
