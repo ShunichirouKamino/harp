@@ -1,5 +1,7 @@
 use std::convert::TryFrom;
 
+use super::to_query_string::ToQueryString;
+
 /// Value objects for field-size.
 ///
 #[derive(PartialEq, Eq, Clone, PartialOrd, Ord, Debug, Default)]
@@ -25,9 +27,15 @@ impl From<FieldSize> for u16 {
     }
 }
 
-/// When converting to string, add `()`
 impl ToString for FieldSize {
     fn to_string(&self) -> String {
+        self.field_size_number.to_string()
+    }
+}
+
+/// When converting to string, add `()`
+impl ToQueryString for FieldSize {
+    fn to_query_string(&self) -> String {
         format!("({})", self.field_size_number)
     }
 }

@@ -1,5 +1,7 @@
 use std::convert::TryFrom;
 
+use super::to_query_string::ToQueryString;
+
 /// Value objects for query-start.
 ///
 #[derive(PartialEq, Eq, Clone, PartialOrd, Ord, Debug, Default)]
@@ -32,8 +34,8 @@ impl From<QueryStart> for String {
 }
 
 /// When converting to string, add query start strings
-impl ToString for QueryStart {
-    fn to_string(&self) -> String {
+impl ToQueryString for QueryStart {
+    fn to_query_string(&self) -> String {
         format!("CREATE TABLE {} (", self.table_name)
     }
 }

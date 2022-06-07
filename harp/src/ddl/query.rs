@@ -7,18 +7,12 @@ use super::{
 
 #[derive(Clone, PartialEq, Eq, Debug, Default)]
 pub struct Query {
-    table_name: String,
-
     query_start: QueryStart,
 
     field: Vec<Field>,
 }
 
 impl Query {
-    pub fn table_name_mut(&mut self) -> &mut String {
-        &mut self.table_name
-    }
-
     pub fn query_start_mut(&mut self) -> &mut QueryStart {
         &mut self.query_start
     }

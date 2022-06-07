@@ -1,5 +1,7 @@
 use std::convert::TryFrom;
 
+use super::to_query_string::ToQueryString;
+
 /// Value objects for field-name.
 ///
 #[derive(PartialEq, Eq, Clone, PartialOrd, Ord, Debug, Default)]
@@ -32,8 +34,8 @@ impl From<FieldName> for String {
 }
 
 /// When converting to string, add backquote
-impl ToString for FieldName {
-    fn to_string(&self) -> String {
+impl ToQueryString for FieldName {
+    fn to_query_string(&self) -> String {
         format!("`{}`", self.field_name_string)
     }
 }
