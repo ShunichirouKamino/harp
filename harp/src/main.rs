@@ -1,7 +1,7 @@
 mod cli;
 mod ddl;
 
-use std::path::PathBuf;
+use std::{fs, path::PathBuf};
 
 use anyhow::anyhow;
 use cli::{
@@ -28,11 +28,14 @@ fn main() -> anyhow::Result<()> {
 /// # Default output file path
 ///
 fn find_default_out_path() -> Option<PathBuf> {
-    let output_file = "harp-out";
+    let output_folder = "harp-out";
     let pusher = |mut path: PathBuf| {
-        path.push(output_file);
-        println!("Target persist file: {:?}", path);
-        path
+        path.push(output_folder);
+        println!("Target persist path: {:?}", path);
+        match fs::create_dir(&path) {
+            Err(e) => panic!("{:?}: {}", path, e),
+            Ok(_) => path,
+        }
     };
     home::home_dir().map(pusher)
 }
