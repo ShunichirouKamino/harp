@@ -4,7 +4,7 @@ use std::{fs::File, fs::OpenOptions, io::BufReader, path::PathBuf};
 
 use crate::ddl::domain::field_name::FieldName;
 use crate::ddl::domain::field_size::FieldSize;
-use crate::ddl::domain::query_start::{self, QueryStart};
+use crate::ddl::domain::query_start::QueryStart;
 use crate::ddl::domain::to_query_string::ToQueryString;
 use crate::ddl::field_types::FieldType;
 use crate::ddl::key_types::KeyType;
@@ -25,6 +25,7 @@ pub fn converte_to_ddl(input_path: PathBuf, output_path: PathBuf) -> std::io::Re
     let query_vec: &mut Vec<Query> = &mut Vec::new();
     read_file_to_query(query_vec, reader)?;
 
+    // write query
     for query in query_vec {
         // Save the original output path
         let mut output_each_path = output_path.clone();
@@ -34,12 +35,13 @@ pub fn converte_to_ddl(input_path: PathBuf, output_path: PathBuf) -> std::io::Re
             .write(true)
             .create(true)
             .open(&output_each_path)?;
-        // start writing query
+        // write query starting
         writeln!(file, "{}", query.query_start_mut().to_query_string())?;
 
         for f in query.field_mut() {
             write_field(f, &mut file)?;
         }
+        writeln!(file, "{}", ")")?
     }
 
     Ok(())
@@ -149,8 +151,3 @@ fn write_field(field: &mut Field, file: &mut File) -> std::io::Result<()> {
 
     Ok(())
 }
-// impl<Format> std::fmt::Display for Vec<Format> {
-//     fn fmt(&self, _: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-//         Ok(())
-//     }
-// }
