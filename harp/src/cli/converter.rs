@@ -1,4 +1,4 @@
-use std::io::{BufRead, Write};
+use std::io::{BufRead, Seek, SeekFrom, Write};
 use std::str::FromStr;
 use std::{fs::File, fs::OpenOptions, io::BufReader, path::PathBuf};
 
@@ -33,6 +33,7 @@ pub fn converte_to_ddl(input_path: PathBuf, output_path: PathBuf) -> std::io::Re
         println!("{:?}", output_each_path);
         let mut file = OpenOptions::new()
             .write(true)
+            .read(true)
             .create(true)
             .open(&output_each_path)?;
         // write query starting
@@ -43,6 +44,9 @@ pub fn converte_to_ddl(input_path: PathBuf, output_path: PathBuf) -> std::io::Re
         }
         for f in query.field_mut() {
             write_key(f, &mut file)?;
+        }
+        if let Ok(_) = file.seek(SeekFrom::End(-2)) {
+            writeln!(file, "{}", "")?;
         }
         writeln!(file, "{}", ")")?
     }
@@ -141,7 +145,7 @@ fn write_field(field: &mut Field, file: &mut File) -> std::io::Result<()> {
     }
     // Not null
     if *field.is_not_null() {
-        field_out.push_str(" NOT_NULL");
+        field_out.push_str(" NOT NULL");
     }
     // Default value
     if let Some(default_value) = field.default_value() {
