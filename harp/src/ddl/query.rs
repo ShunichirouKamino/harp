@@ -1,5 +1,5 @@
 use super::{
-    domain::{field_name::FieldName, field_size::FieldSize},
+    domain::{field_name::FieldName, field_size::FieldSize, query_start::QueryStart},
     field_types::FieldType,
     key_types::KeyType,
     remark_types::RemarkType,
@@ -9,7 +9,7 @@ use super::{
 pub struct Query {
     table_name: String,
 
-    format: String,
+    query_start: QueryStart,
 
     field: Vec<Field>,
 }
@@ -19,8 +19,8 @@ impl Query {
         &mut self.table_name
     }
 
-    pub fn format_mut(&mut self) -> &mut String {
-        &mut self.format
+    pub fn query_start_mut(&mut self) -> &mut QueryStart {
+        &mut self.query_start
     }
 
     pub fn field_mut(&mut self) -> &mut Vec<Field> {
