@@ -41,6 +41,9 @@ pub fn converte_to_ddl(input_path: PathBuf, output_path: PathBuf) -> std::io::Re
         for f in query.field_mut() {
             write_field(f, &mut file)?;
         }
+        for f in query.field_mut() {
+            write_key(f, &mut file)?;
+        }
         writeln!(file, "{}", ")")?
     }
 
@@ -130,24 +133,42 @@ fn convert_remark(field: &mut Field, remark_fields: &str) {
 
 fn write_field(field: &mut Field, file: &mut File) -> std::io::Result<()> {
     let mut field_out = String::from("  ");
-    field_out = field_out + &field.field_name().to_query_string();
-    field_out = field_out + " ";
-    field_out = field_out + &field.field_type().as_ref();
+    field_out.push_str(&field.field_name().to_query_string());
+    field_out.push_str(" ");
+    field_out.push_str(&field.field_type().as_ref());
     if let Some(size) = field.field_size() {
-        field_out = field_out + &size.to_query_string();
+        field_out.push_str(&size.to_query_string());
     }
     // Not null
     if *field.is_not_null() {
-        field_out = field_out + " NOT_NULL"
+        field_out.push_str(" NOT_NULL");
     }
     // Default value
     if let Some(default_value) = field.default_value() {
-        field_out = field_out + " ";
-        field_out = field_out + &default_value.to_string();
+        field_out.push_str(" ");
+        field_out.push_str(&default_value.to_string());
     }
-    field_out = field_out + ",";
+    field_out.push_str(",");
     // write field
     writeln!(file, "{}", field_out)?;
+    Ok(())
+}
 
+fn write_key(field: &mut Field, file: &mut File) -> std::io::Result<()> {
+    let field_out: &mut String = &mut String::from("  ");
+    if let Some(key_type) = field.key_type() {
+        match key_type {
+            KeyType::PK => {
+                field_out.push_str(&key_type.to_string());
+                field_out.push_str(" (");
+                field_out.push_str(&field.field_name().to_query_string());
+                field_out.push_str(")");
+                field_out.push_str(",");
+                writeln!(file, "{}", field_out)?;
+            }
+            KeyType::FK => todo!(),
+            KeyType::Nothing => todo!(),
+        }
+    }
     Ok(())
 }
