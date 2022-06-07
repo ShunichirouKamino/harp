@@ -1,14 +1,15 @@
-use std::io::BufRead;
+use std::io::{BufRead, Write};
 use std::str::FromStr;
 use std::{fs::File, fs::OpenOptions, io::BufReader, path::PathBuf};
 
 use crate::ddl::domain::field_name::FieldName;
 use crate::ddl::domain::field_size::FieldSize;
+use crate::ddl::domain::query_start::{self, QueryStart};
+use crate::ddl::domain::to_query_string::ToQueryString;
 use crate::ddl::field_types::FieldType;
 use crate::ddl::key_types::KeyType;
 use crate::ddl::query::{Field, Query};
 use crate::ddl::remark_types::RemarkType;
-use crate::ddl::template::create_query::CREATE_START;
 
 const CODE_BLOCK: &str = "```mermaid";
 // const ER_START: &str = "erDiagram";
@@ -19,13 +20,35 @@ const ENTITY_END: &str = "}";
 ///
 pub fn converte_to_ddl(input_path: PathBuf, output_path: PathBuf) -> std::io::Result<()> {
     let input_file = OpenOptions::new().read(true).open(&input_path)?;
-
+    println!("Target input file: {:?}", input_file);
     let reader = BufReader::new(input_file);
+    let query_vec: &mut Vec<Query> = &mut Vec::new();
+    read_file_to_query(query_vec, reader)?;
 
+    for query in query_vec {
+        // Save the original output path
+        let mut output_each_path = output_path.clone();
+        output_each_path.push(String::from(query.query_start_mut().clone()) + ".sql");
+        println!("{:?}", output_each_path);
+        let mut file = OpenOptions::new()
+            .write(true)
+            .create(true)
+            .open(&output_each_path)?;
+        // start writing query
+        writeln!(file, "{}", query.query_start_mut().to_query_string())?;
+
+        for f in query.field_mut() {
+            write_field(f, &mut file)?;
+        }
+    }
+
+    Ok(())
+}
+
+fn read_file_to_query(query_vec: &mut Vec<Query>, reader: BufReader<File>) -> std::io::Result<()> {
     let mut is_er_block: bool = false;
     let mut is_entity_block: bool = false;
     let mut query = Query::default();
-    let mut query_vec: Vec<Query> = Vec::new();
     let mut field: Field;
     let mut field_vec: Vec<Field> = Vec::new();
     for line in reader.lines() {
@@ -38,7 +61,7 @@ pub fn converte_to_ddl(input_path: PathBuf, output_path: PathBuf) -> std::io::Re
             if !is_entity_block {
                 if let Some(_) = s.find(ENTITY_START) {
                     let table_name = s.replace(ENTITY_START, "");
-                    *query.table_name_mut() = table_name;
+                    *query.query_start_mut() = QueryStart::of(table_name).unwrap();
                     is_entity_block = true; // into entity block
                 }
             } else {
@@ -60,10 +83,10 @@ pub fn converte_to_ddl(input_path: PathBuf, output_path: PathBuf) -> std::io::Re
                         if let Ok(key_type) = KeyType::from_str(next) {
                             *field.key_type() = Some(key_type);
                         }
-                        remark_convert(&mut field, next);
+                        convert_remark(&mut field, next);
                     }
                     if let Some(next) = field_line.next() {
-                        remark_convert(&mut field, next)
+                        convert_remark(&mut field, next)
                     }
 
                     // if "String", it shoud be something like "varchar_32"
@@ -84,28 +107,10 @@ pub fn converte_to_ddl(input_path: PathBuf, output_path: PathBuf) -> std::io::Re
             }
         }
     }
-
-    for mut query in query_vec {
-        let query_out = CREATE_START;
-        for f in query.field_mut() {
-            let mut field_out = "  ";
-            field_out = field_out + &f.field_name().to_string();
-            field_out = field_out + " ";
-            field_out = field_out + &f.field_type().as_ref();
-            if let Some(size) = f.field_size() {
-                field_out + &size.to_string();
-            }
-
-            println!("{:?}", field_out)
-        }
-    }
-
-    File::create(output_path).unwrap();
-
     Ok(())
 }
 
-fn remark_convert(field: &mut Field, remark_fields: &str) {
+fn convert_remark(field: &mut Field, remark_fields: &str) {
     let remark_fields = remark_fields.replace(r#"""#, "");
     for r in remark_fields.split_whitespace() {
         if let Ok(remark_type) = RemarkType::from_str(r) {
@@ -121,6 +126,29 @@ fn remark_convert(field: &mut Field, remark_fields: &str) {
     }
 }
 
+fn write_field(field: &mut Field, file: &mut File) -> std::io::Result<()> {
+    let mut field_out = String::from("  ");
+    field_out = field_out + &field.field_name().to_query_string();
+    field_out = field_out + " ";
+    field_out = field_out + &field.field_type().as_ref();
+    if let Some(size) = field.field_size() {
+        field_out = field_out + &size.to_query_string();
+    }
+    // Not null
+    if *field.is_not_null() {
+        field_out = field_out + " NOT_NULL"
+    }
+    // Default value
+    if let Some(default_value) = field.default_value() {
+        field_out = field_out + " ";
+        field_out = field_out + &default_value.to_string();
+    }
+    field_out = field_out + ",";
+    // write field
+    writeln!(file, "{}", field_out)?;
+
+    Ok(())
+}
 // impl<Format> std::fmt::Display for Vec<Format> {
 //     fn fmt(&self, _: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
 //         Ok(())
