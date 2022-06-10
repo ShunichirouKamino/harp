@@ -1,6 +1,6 @@
 # harp
 
-`harp` converts ER-diagram by mermaid to DDL query.
+`harp` converts ER-diagram by `mermaid` to DDL query.
 
 # Usage
 
